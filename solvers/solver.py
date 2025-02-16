@@ -10,7 +10,6 @@ class Properties:
     reasoner_model: Optional[Model] = Model(ModelName.O3_MINI_MEDIUM)
     verifier_model: Optional[Model] = Model(ModelName.O3_MINI_HIGH)
 
-
 class Solver(ABC):
     def __init__(self, problem_statement: str, properties: Properties):
         self.problem_statement = problem_statement

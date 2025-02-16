@@ -2,9 +2,8 @@ import openai
 from utils.prompts import Prompts
 from . import Solver
 
-class NoFeedback(Solver):
+class Feedback(Solver):
     def validate_input(self) -> None:
-        """Validate input parameters before solving."""
         if not self.problem_statement.strip():
             raise ValueError("Problem statement cannot be empty")
         if self.properties.max_reasoning_tries <= 0:
@@ -15,14 +14,14 @@ class NoFeedback(Solver):
     def run(self):
         try:
             self.validate_input()
+            reasoner_conversation = [
+                Prompts.REASONER_INITIAL_SYSTEM_PROMPT.value,
+                {
+                    "role": "user",
+                    "content": f"Math Olympiad Problem: {self.problem_statement}",
+                },
+            ]
             for reasoner_trial in range(self.properties.max_reasoning_tries):
-                reasoner_conversation = [
-                    Prompts.REASONER_INITIAL_SYSTEM_PROMPT.value,
-                    {
-                        "role": "user",
-                        "content": f"Math Olympiad Problem: {self.problem_statement}",
-                    },
-                ]
                 reasoner_response = self.properties.reasoner_model.send_request(
                     reasoner_conversation
                 )
@@ -42,10 +41,23 @@ class NoFeedback(Solver):
                         solution_incorrect = True
                         break
 
-                if solution_incorrect:
-                    continue
+                if not solution_incorrect:
+                    break
 
-                break
+                verifier_conversation.append(
+                    Prompts.VERIFIER_PARTIAL_PROGRESS_PROMPT.value
+                )
+                partial_progress = self.properties.verifier_model.send_request(
+                    verifier_conversation
+                )
+                reasoner_conversation = [
+                    Prompts.REASONER_SYSTEM_PROMPT.value,
+                    {
+                        "role": "user",
+                        "content": f"Problem: {self.problem_statement}\n\nPartial Progress: {partial_progress}",
+                    },
+                ]
+        
             return reasoner_response
 
         except openai.APIError as e:
