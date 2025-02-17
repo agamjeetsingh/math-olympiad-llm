@@ -133,7 +133,3 @@ class FeedbackAndCondensed(Solver):
             print(f"OpenAI API error: {e}")
         except Exception as e:
             print(f"Unexpected error: {e}")
-
-
-obj = FeedbackAndCondensed("What is 2+2?", Properties())
-obj.run()
