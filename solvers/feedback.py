@@ -21,7 +21,7 @@ class Feedback(Solver):
                     "content": f"Math Olympiad Problem: {self.problem_statement}",
                 },
             ]
-            for reasoner_trial in range(self.properties.max_reasoning_tries):
+            for _ in range(self.properties.max_reasoning_tries):
                 reasoner_response = self.properties.reasoner_model.send_request(
                     reasoner_conversation
                 )
@@ -33,7 +33,7 @@ class Feedback(Solver):
                     },
                 ]
                 solution_incorrect = False
-                for i in range(self.properties.max_verifier_passes):
+                for _ in range(self.properties.max_verifier_passes):
                     verifier_response = self.properties.verifier_model.send_request(
                         verifier_conversation
                     )
