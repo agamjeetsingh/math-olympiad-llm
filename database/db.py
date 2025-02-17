@@ -80,10 +80,10 @@ def split_list(lst, is_delimiter):
 @dataclass
 class Solution:
     problem: str
-    problem_id: str
+    problem_id: str # Like: "IMO-2021-P1"
     solution: str
     solver_type: NoFeedback | Feedback
-    success: bool
+    success: bool = None
     timestamp: datetime
     solving_process: SolvingProcess
     error: Optional[str] = None
