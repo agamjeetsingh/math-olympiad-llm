@@ -32,3 +32,15 @@ class Prompts(Enum):
     At the end of the partial proof, include a note, advising the reader that while these steps are valid, they should also consider alternative approaches since the current line of reasoning might be a dead end.
 """,
     }
+    CONDENSE_ENTIRE_DISCUSSION_PROMPT = {
+        "role": "system",
+        "content": """
+        TODO
+        """
+    }
+    REASONER_CONDENSED_DISCUSSION_PROMPT = {
+        "role": "system",
+        "content": """
+        TODO
+        """
+    }
