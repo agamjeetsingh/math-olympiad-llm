@@ -1,11 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import openai
-from solvers.solver import Properties, Solver
+from solvers.solver import Solver
 from utils.prompts import Prompts
 
 
-@dataclass
+
 class Verdict(Enum):
     CORRECT = "CORRECT"
     INCORRECT = "INCORRECT"
@@ -15,8 +15,8 @@ class Verdict(Enum):
 @dataclass
 class SolutionAndVerifications:
     solution: str
-    verifications: list[str] = []
-    verdict: Verdict = Verdict.UNKNOWN
+    verifications: list[str] = field(default_factory=list)
+    verdict: Verdict = field(default_factory=lambda: Verdict.UNKNOWN)
 
 
 class FeedbackAndCondensed(Solver):
@@ -31,6 +31,7 @@ class FeedbackAndCondensed(Solver):
             raise ValueError("parallel_reasoning_tries must be positive")
 
     def run(self):
+        file = open("output5.txt", "a")
         try:
             problem_solved = False
             self.validate_input()
@@ -45,10 +46,12 @@ class FeedbackAndCondensed(Solver):
                 responses = self.properties.reasoner_model.send_request_times(
                     reasoner_conversation, self.properties.parallel_reasoning_tries
                 )
+                print("Reasoning done!")
                 response_objects = [
                     SolutionAndVerifications(response) for response in responses
                 ]
-                for _ in range(self.properties.max_verifier_passes):
+                for i in range(self.properties.max_verifier_passes):
+                    print("Verifying..." + str(i))
                     verifier_conversations = [
                         [
                             Prompts.VERIFIER_SYSTEM_PROMPT.value,
@@ -60,6 +63,7 @@ class FeedbackAndCondensed(Solver):
                         for response_object in response_objects
                         if response_object.verdict == Verdict.UNKNOWN
                     ]
+                    print(len(verifier_conversations))
                     verifier_responses = (
                         self.properties.verifier_model.send_request_parallel(
                             verifier_conversations
@@ -84,17 +88,15 @@ class FeedbackAndCondensed(Solver):
                     if response_object.verdict == Verdict.UNKNOWN:
                         response_object.verdict = Verdict.CORRECT
 
+                print([response_object.verdict.value for response_object in response_objects])
+                
                 correct_responses = [
                     response_object
                     for response_object in response_objects
                     if response_object.verdict == Verdict.CORRECT
                 ]
 
-                if correct_responses:
-                    problem_solved = True
-                    return correct_responses[0].solution
-
-                entire_discussion = "".join(
+                entire_discussion = "\n\n\n".join(
                     [
                         f"Reasoner's Attempt {idx}: {response_object.solution}\nVerifications: \n"
                         + "\n\n".join(
@@ -107,6 +109,12 @@ class FeedbackAndCondensed(Solver):
                     ]
                 )
 
+                file.write(entire_discussion)
+
+                if correct_responses:
+                    problem_solved = True
+                    return correct_responses[0].solution
+
                 condensed_discussion = (
                     self.properties.discussion_condenser_model.send_request(
                         [
@@ -118,7 +126,9 @@ class FeedbackAndCondensed(Solver):
                         ]
                     )
                 )
-                
+
+                file.write("\n\nCondensed discussion:" + condensed_discussion + "\n\n")
+
                 reasoner_conversation = [
                     Prompts.REASONER_CONDENSED_DISCUSSION_PROMPT.value,
                     {
@@ -126,9 +136,9 @@ class FeedbackAndCondensed(Solver):
                         "content": condensed_discussion,
                     },
                 ]
-                
+
             return f"Couldn't solve problem. Here's a summary of what we tried:\n{condensed_discussion}"
-            
+
         except openai.APIError as e:
             print(f"OpenAI API error: {e}")
         except Exception as e:
