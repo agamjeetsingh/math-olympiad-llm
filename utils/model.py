@@ -21,6 +21,17 @@ class Model:
             self.base_url = "https://router.requesty.ai/v1"
         else:
             self.base_url = "https://openrouter.ai/api/v1"
+            
+    def deepseek_fix_conversation(self, conversation):
+        if conversation[0]["role"] == "system":
+            system_message = conversation.pop(0)
+            user_message = conversation.pop(0)
+            new_message = {
+                "role": "user",
+                "content": system_message["content"] + "\n\n" + user_message["content"],
+            }
+            conversation.insert(0, new_message)
+        return conversation
 
     def send_request(self, conversation):
         load_dotenv()
@@ -29,6 +40,10 @@ class Model:
         else:
             api_key = os.getenv("OPENROUTER_API_KEY")
         client = openai.OpenAI(api_key=api_key, base_url=self.base_url)
+        
+        if ModelName.DEEPSEEK in self.model_name:
+            conversation = self.deepseek_fix_conversation(conversation)
+        
         response = client.chat.completions.create(
             model=self.model_name.value, messages=conversation
         )
