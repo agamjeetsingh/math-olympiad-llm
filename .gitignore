@@ -35,12 +35,5 @@ env/
 *.swp
 *.swo
 
-# Output Files
-o3-mini-verifier-pass@1/
-*.txt
-!requirements.txt
-
 # Legacy File
-example*.py
-quickTest.py
-send_prompt.py
+legacy*/
