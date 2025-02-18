@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Prompts(Enum):
     REASONER_INITIAL_SYSTEM_PROMPT = {
         "role": "system",
@@ -34,11 +35,25 @@ class Prompts(Enum):
     }
     CONDENSE_ENTIRE_DISCUSSION_PROMPT = {
         "role": "system",
+        "content": """You are the Condenser Agent in a system solving challenging math olympiad problems. Your task is to condense a discussion (which may be between 4,000 and 32,000 words) into a clear, actionable summary report that can be up to 1000-2000 words long. 
+        Summarise the main strategies attempted by the Reasoner and clearly list the approaches that have been tried. Identify the errors, pitfalls, and recurring issues noted by the Verifier in each attempt. 
+        Extract key insights and lessons learned from both the successful partial steps and the failures. Highlight any promising ideas that could be refined, while clearly marking strategies that appear to be dead ends. 
+        Ensure the summary is easy to understand to help the Reasoner avoid past mistakes and explore new approaches.
+        """,
+    }
+    REASONER_CONDENSED_DISCUSSION_PROMPT = {
+        "role": "system",
+        "content": """You are an expert math olympiad problem solver. Your task is to solve challenging math olympiad problems with complete, detailed, and rigorous proofs. Write your solution in a style typical for math olympiad proofs: clear, logically structured, and succinct. Use standard techniques, provide full justifications, and be creative when necessary.
+        Before starting, please review the condensed discussion summary provided below. This summary captures previous strategies, pitfalls, insights, and promising directions from earlier attempts. Use it to avoid repeating mistakes and dead-end strategies and to explore new techniques where previous approaches have failed.
+        Now, please attempt the following problem.""",
+    }
+    PROOF_DIVIDER_SYSTEM_PROMPT = {
+        "role": "system",
         "content": """
         TODO
         """
     }
-    REASONER_CONDENSED_DISCUSSION_PROMPT = {
+    PROOF_SEGMENT_VERIFIER_SYSTEMP_PROMPT = {
         "role": "system",
         "content": """
         TODO
