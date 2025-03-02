@@ -3,22 +3,22 @@ from utils.prompts import Prompts
 from . import Solver
 
 class Feedback(Solver):
-    def validate_input(self) -> None:
-        if not self.problem_statement.strip():
+    def validate_input(self, problem_statement) -> None:
+        if not problem_statement.strip():
             raise ValueError("Problem statement cannot be empty")
         if self.properties.max_reasoning_tries <= 0:
             raise ValueError("max_reasoning_tries must be positive")
         if self.properties.max_verifier_passes <= 0:
             raise ValueError("max_verifier_passes must be positive")
 
-    def run(self):
+    def run(self, problem_statement: str) -> str:
         try:
-            self.validate_input()
+            self.validate_input(problem_statement)
             reasoner_conversation = [
                 Prompts.REASONER_INITIAL_SYSTEM_PROMPT.value,
                 {
                     "role": "user",
-                    "content": f"Math Olympiad Problem: {self.problem_statement}",
+                    "content": f"Math Olympiad Problem: {problem_statement}",
                 },
             ]
             for _ in range(self.properties.max_reasoning_tries):
@@ -29,7 +29,7 @@ class Feedback(Solver):
                     Prompts.VERIFIER_SYSTEM_PROMPT.value,
                     {
                         "role": "user",
-                        "content": f"Problem: {self.problem_statement}\nPotential Solution: {reasoner_response}",
+                        "content": f"Problem: {problem_statement}\nPotential Solution: {reasoner_response}",
                     },
                 ]
                 solution_incorrect = False
@@ -54,7 +54,7 @@ class Feedback(Solver):
                     Prompts.REASONER_SYSTEM_PROMPT.value,
                     {
                         "role": "user",
-                        "content": f"Problem: {self.problem_statement}\n\nPartial Progress: {partial_progress}",
+                        "content": f"Problem: {problem_statement}\n\nPartial Progress: {partial_progress}",
                     },
                 ]
         
