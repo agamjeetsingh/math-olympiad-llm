@@ -1,7 +1,7 @@
-from .solver import Solver, Properties
+from .base import Solver
 from .no_feedback import NoFeedback
 from .feedback import Feedback
 from .feedback_and_condensed import FeedbackAndCondensed
 from .deep_check import DeepCheck
 
-__all__ = ['Solver', 'Properties', 'NoFeedback', 'Feedback', 'FeedbackAndCondensed', 'DeepCheck']
+__all__ = ['Solver', 'NoFeedback', 'Feedback', 'FeedbackAndCondensed', 'DeepCheck']
